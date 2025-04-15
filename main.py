@@ -29,17 +29,10 @@ def next_card():
     timer = window.after(3000, english_switch, sample_dict)
 
 def yes_next_card():
-    global timer
     global sample_dict
     global words_dict
     words_dict.remove(sample_dict)
-    window.after_cancel(timer)
-    sample_dict = random.choice(words_dict)
-    french_word = sample_dict["French"]
-    card_canvas.itemconfig(img_container, image=card_front_img)
-    card_canvas.itemconfig(language_text, text="French", fill="black")
-    card_canvas.itemconfig(word_text, text=french_word, fill="black")
-    timer = window.after(3000, english_switch, sample_dict)
+    next_card()
 
 # Card Changes after 3000 MS
 
