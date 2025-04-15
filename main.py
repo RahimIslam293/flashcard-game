@@ -8,15 +8,38 @@ timer = None
 
 #-----------------------WORD RETRIEVAL / CARD FLIP------------------------#
 
-words = pandas.read_csv("./data/french_words.csv")
+try:
+    words = pandas.read_csv("words_to_learn.csv")
+except FileNotFoundError:
+    words = pandas.read_csv("./data/french_words.csv")
+
 words_dict = words.to_dict(orient="records")
+sample_dict = {}
+known_cards={}
+
 def next_card():
+    global timer
+    global sample_dict
+    window.after_cancel(timer)
     sample_dict = random.choice(words_dict)
     french_word = sample_dict["French"]
     card_canvas.itemconfig(img_container, image=card_front_img)
     card_canvas.itemconfig(language_text, text="French", fill="black")
     card_canvas.itemconfig(word_text, text=french_word, fill="black")
-    window.after(3000, english_switch, sample_dict)
+    timer = window.after(3000, english_switch, sample_dict)
+
+def yes_next_card():
+    global timer
+    global sample_dict
+    global words_dict
+    words_dict.remove(sample_dict)
+    window.after_cancel(timer)
+    sample_dict = random.choice(words_dict)
+    french_word = sample_dict["French"]
+    card_canvas.itemconfig(img_container, image=card_front_img)
+    card_canvas.itemconfig(language_text, text="French", fill="black")
+    card_canvas.itemconfig(word_text, text=french_word, fill="black")
+    timer = window.after(3000, english_switch, sample_dict)
 
 # Card Changes after 3000 MS
 
@@ -45,10 +68,14 @@ x_img = PhotoImage(file="./images/wrong.png")
 x_btn = Button(image=x_img, highlightthickness=0, command=next_card)
 x_btn.grid(column=0, row=1, pady=25)
 chk_img = PhotoImage(file="./images/right.png")
-chk_btn = Button(image=chk_img, highlightthickness=0, command=next_card)
+chk_btn = Button(image=chk_img, highlightthickness=0, command=yes_next_card)
 chk_btn.grid(column=1, row=1, pady=25)
 
+timer = window.after(3000, english_switch)
 next_card()
 
 
 window.mainloop()
+
+df = pandas.DataFrame(words_dict)
+df.to_csv("words_to_learn.csv", index=False)
